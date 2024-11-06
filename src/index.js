@@ -1,9 +1,17 @@
-const express = require('express');
-const app = express();
-const morgan = require('morgan');
-const path = require('path');
+import express from 'express';
+import morgan from 'morgan';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-// Settings 
+import documentReferenceRouter from './routes/documentReference.js';
+import indexRouter from './routes/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+// Settings
 app.set('port', process.env.PORT || 3000);
 
 // Middleware
@@ -12,17 +20,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Static files
-// Verificación de __dirname 
-console.log('__dirname:', __dirname); 
-// Ajuste de la ruta para archivos estáticos 
-const publicDirectoryPath = path.resolve(__dirname, 'public'); 
-console.log('Serving static files from:', publicDirectoryPath); 
+const publicDirectoryPath = resolve(__dirname, 'public');
 app.use(express.static(publicDirectoryPath));
 
 // Routes
-app.use(require('./routes/index.js'));
+app.use('/', indexRouter);
+app.use('/api', documentReferenceRouter);
 
-// Inicializando el servidor
+// Start the server
 app.listen(app.get('port'), () => {
-    console.log(`listening on port: ${app.get('port')}`);
+  console.log(`Server listening on port ${app.get('port')}`);
 });

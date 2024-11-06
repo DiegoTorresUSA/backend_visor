@@ -1,10 +1,11 @@
-const URL_BASE = 'https://ihce.ihcecol.gov.co';
+const URL_BASE = process.env.URL_BASE;
+const FHIR_REGION_ID = process.env.FHIR_REGION_ID;
 const URL_FINAL_MEDICAMENTOS = '&_include=Composition:entry:MedicationStatement';
 const URL_FINAL_ALERGIAS = '&_include=Composition:entry:AllergyIntolerance';
-const URL_FINAL_DIAGNOSTICOS = '&_include=Composition:entry:Condition'
-const URL_REGION = 'https://ihce.ihcecol.gov.co/170/fhir/Organization/'
+const URL_FINAL_DIAGNOSTICOS = '&_include=Composition:entry:Condition';
+const URL_REGION = `${URL_BASE}/${FHIR_REGION_ID}/fhir/Organization/`;
 //const URL_DOCUMENT = 'https://ihce.ihcecol.gov.co/25/fhir/Composition/134/$document'
-const pais = '170';
+//const pais = '170';
 let arregloReference = [];
 let relacionReference = [];
 let urlPatient;
@@ -15,8 +16,8 @@ let region;
 let region2;
 let medicamentos = [];
 let diagnosticos = [];
-const API_KEY_DR = 'DEEPKXj3b6zHMUybBm5ZpJ7ZnvNqkL1K'; // Your API key
-const API_KEY_PAT = 'cemlFvNLWen9Gl5Bxw3UDvmVNwDonBZj'; // Your API key
+const API_KEY_DR = process.env.API_KEY_DR;
+const API_KEY_PAT = process.env.API_KEY_PAT;
 
 
 //Capturo los contenedores para renderizar la información
@@ -1272,9 +1273,4 @@ function ocultarSpinner() {
     }
 }
 
-//obtenerRegion('reg-73');
-//consultarDocumentReference();
-//infoPaciente();
-//19383283 , 7310548, 13993913, 10307685
-//<li class="breadcrumb-item active" aria-current="page"><span>Fecha: ${info.fecha}</span></li>-->
 

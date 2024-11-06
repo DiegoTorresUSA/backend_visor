@@ -1,6 +1,6 @@
-const { Router } = require('express');
+import { Router } from 'express';
 const router = Router();
-const path = require('path');
+import { join } from 'path';
 
 
 router.get('/', (req, res) => {
@@ -16,8 +16,8 @@ router.get('/test', (req, res) => {
     });
     
 router.get("/consulta", (req, res) => {
-    res.sendFile(path.join(__dirname, "../pages/visor.html"));
+    res.sendFile(join(__dirname, "../pages/visor.html"));
 });
     
 
-     module.exports = router;
+     export default router;
