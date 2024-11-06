@@ -1,0 +1,80 @@
+:root{
+    --background-ms: red;
+    i.material-icons { color: crimson !important; }
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+header{
+    height: 70px;
+}
+
+.align-text-top{
+    height: 70px;
+}
+
+.navbar{
+    margin: 0;
+    padding: 0 !important;
+}
+
+.container{
+    display: flex;
+}
+
+.collapse{
+    justify-content: center;
+}
+
+.contenedor-titulo{
+    display: flex;
+    align-items: center;
+}
+
+form{
+    width: 50%;
+}
+
+form > div{
+    justify-content: flex-start;
+    margin-left: 20px;
+    padding-left: 20px;
+}
+
+.form-control{
+    width: 100%;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    padding: 0 0.5rem; /* Espaciado alrededor del separador */
+}
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    list-style: none;
+    background-color: #e9ecef;
+    border-radius: 0.375rem;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    padding: 0 0.5rem; /* Espaciado alrededor del separador */
+}
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.icon-style {
+    margin-right: 10px; /* Añade espacio entre el icono y el texto */
+    fill: #007bff; /* Cambia el color del SVG */
+}
+
