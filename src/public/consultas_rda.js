@@ -1,11 +1,3 @@
-const URL_BASE = process.env.URL_BASE;
-const FHIR_REGION_ID = process.env.FHIR_REGION_ID;
-const URL_FINAL_MEDICAMENTOS = '&_include=Composition:entry:MedicationStatement';
-const URL_FINAL_ALERGIAS = '&_include=Composition:entry:AllergyIntolerance';
-const URL_FINAL_DIAGNOSTICOS = '&_include=Composition:entry:Condition';
-const URL_REGION = `${URL_BASE}/${FHIR_REGION_ID}/fhir/Organization/`;
-//const URL_DOCUMENT = 'https://ihce.ihcecol.gov.co/25/fhir/Composition/134/$document'
-//const pais = '170';
 let arregloReference = [];
 let relacionReference = [];
 let urlPatient;
@@ -16,27 +8,22 @@ let region;
 let region2;
 let medicamentos = [];
 let diagnosticos = [];
-const API_KEY_DR = process.env.API_KEY_DR;
-const API_KEY_PAT = process.env.API_KEY_PAT;
+
 
 
 //Capturo los contenedores para renderizar la información
-const containerComposition = document.getElementById("accordion-body-composition");
 const containerPatient = document.getElementById("accordion-body-patient");
-const containerMedicamentos = document.getElementById("accordion-body-medicaments");
-const containerAlergias = document.getElementById("accordion-body-alergias");
-const containerDiagnosticos = document.getElementById("accordion-body-diagnosticos");
 const getdocumento = document.getElementById("inputDocumento");
 const getTipoDocumento = document.getElementById("inputTipoDocumento");
 const containerEnvios = document.getElementById("accordion-body-envios");
 
 
 
-document.getElementById("consultaInfoIhce").addEventListener("click", function(e){
+document.getElementById("consultaInfoIhce").addEventListener("click", function (e) {
     e.preventDefault();
     let documento = getdocumento.value;
     let tipoDocumento = getTipoDocumento.value;
-    if (!documento){
+    if (!documento) {
         var notyf = new Notyf({
             duration: 2000,
             position: {
@@ -45,7 +32,7 @@ document.getElementById("consultaInfoIhce").addEventListener("click", function(e
             }// Set your global Notyf configuration here
         });
         notyf.error('Debes digitar un Número de documento');
-    }else if (documento.length <= 5){
+    } else if (documento.length <= 5) {
         var notyf = new Notyf({
             duration: 2000,
             position: {
@@ -54,22 +41,11 @@ document.getElementById("consultaInfoIhce").addEventListener("click", function(e
             }// Set your global Notyf configuration here
         });
         notyf.error('Número de documento no valido');
-    }else {
+    } else {
         obtenerYConsultar(documento, tipoDocumento);
     }
 });
 
-
-const configurarFetch = (endpoint, method = 'GET') => {
-    return fetch(endpoint, {
-        method: method,
-        headers: {
-            'x-api-key': API_KEY_DR
-        },
-        mode: "cors",
-        cache: "default",
-    });
-};
 
 const configurarFetchPat = (endpoint, method = 'GET') => {
     return fetch(endpoint, {
@@ -128,17 +104,6 @@ const configurarfetchDocument = (endpoint, method = 'GET') => {
 }
 
 
-const configurarFetchRegion = (endpoint, method = 'GET') => {
-    return fetch(endpoint, {
-        method: method,
-        headers: {
-            'x-api-key': API_KEY_DR
-        },
-        mode: "cors",
-        cache: "default",
-    })
-}
-
 const configurarFetchPais = (endpoint, method = 'GET') => {
     return fetch(endpoint, {
         method: method,
@@ -146,37 +111,6 @@ const configurarFetchPais = (endpoint, method = 'GET') => {
         cache: "default",
     });
 };
-
-//****************Informacion Institucion********************
-
-const obtenerRegion = async (region) => {
-    try {
-        const response = await configurarFetchRegion(`${URL_REGION}${region}`);
-        console.log("Conexión realizada");
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.log("Unauthorized: Invalid API key");
-            } else {
-                console.error("Error:", response.statusText);
-            }
-            return null; // Or throw an error if needed
-        }
-
-        const datos = await response.json();
-        if (datos.name){
-            //console.log("nombreRegion", nombreRegion);
-            return datos.name;
-        }else{
-            console.warn("No existe nombre Región");
-            return null; // Or throw an error if needed
-        }
-
-    } catch (error) {
-        console.error('Error:', error);
-        return null; // Or throw an error if needed
-    }
-
-}
 
 
 // const obtenerInstitucion = async (institucion) => {
@@ -212,92 +146,7 @@ const obtenerRegion = async (region) => {
 
 //****************Informacion Institucion********************
 
-//****************Informacion DocumentReference********************
-
-const extractDataFromUrl = (attachmentUrl) => {
-    const [territorio, idComposition] = attachmentUrl.split("/").filter(part => !isNaN(part) && part.trim() !== '');
-    return { territorio, idComposition };
-};
-
-
-const obtenerDocumentReference = async (identificacion, tipoDocumento) => {
-    try {
-        mostrarSpinner();
-        const response = await configurarFetch(`${URL_BASE}/${pais}/fhir/DocumentReference?patient.identifier=${identificacion}&patient.identifier-type=${tipoDocumento}&_count=800&_sort=-_lastUpdated`);
-        if (response.ok) {
-            const datos = await response.json();
-            if (datos.total === 0) {
-                var notyf = new Notyf({
-                    duration: 2000,
-                    position: {
-                        x: 'right',
-                        y: 'top',
-                    }
-                });
-                notyf.error('Paciente no existe');
-                ocultarSpinner();
-                return;  // Detenemos la ejecución si no hay resultados
-            }
-                if (datos.entry && datos.entry.length > 0) {
-                    console.log("entre a procesar los Document Reference")
-                    const processedDocumentReferences = await Promise.all(
-                        datos.entry.map(async (entry) => {
-                            // Create a closure function to capture entry for each iteration
-                            const createDocumentObject = async () => {
-                                let urlObjeto = entry.resource.subject.reference;
-                                let urlExtraida = urlObjeto.substring(urlObjeto.indexOf('/', "https://".length));
-                                urlPatient = urlExtraida;
-                                let region = entry.resource.custodian.reference;
-                                let splitpartes = region.split('/');
-                                let referenceRegion = splitpartes.pop();
-                                // Await the obtenerRegion call
-                                const nombreRegion = await obtenerRegion(referenceRegion);
-                                let fullUrlDocRef = entry.fullUrl;
-                                let splitPartes = fullUrlDocRef.split("/");
-                                const idDocRef = splitPartes.pop();
-                                let attachmentUrl = entry.resource.content?.[0]?.attachment?.url;
-                                const { territorio, idComposition } = extractDataFromUrl(attachmentUrl);
-
-                                // Obtener el code y value del practitioner
-                                const { code, value } = await obtenerDocument(territorio, idComposition);
-
-                                // Create the object with captured entry data
-                                return {
-                                    region: nombreRegion,
-                                    autor: entry.resource.author[0].display,
-                                    fecha: entry.resource.date,
-                                    idDocRef,
-                                    code,   // Practitioner code
-                                    value, // Practitioner value
-                                };
-                            };
-                            // Call the closure function to process the entry
-                            return await createDocumentObject();
-                        })
-                    );
-                    await arrayDocumentReference(processedDocumentReferences); // Pass the processed array with code and value
-
-                    if (processedDocumentReferences.length > 0) {
-                    }
-
-                    return { urlPatient};
-                }  else if (response.status === 401) {
-                    // Error de autorización, mostrar el mensaje adecuado
-                    console.log("Unauthorized: Invalid API key");
-                }else {
-                    // Otros tipos de error, ocultar el spinner
-                    console.log("Error:", response.statusText);
-                }
-        }
-    } catch (error) {
-        // Manejar cualquier otro error inesperado
-        console.error('Error en la consulta:', error);
-    }
-}
-
-//****************Informacion DocumentReference********************
-
-const configurarFetchCompositionMedicamentos =(endpoint, method = 'GET') => {
+const configurarFetchCompositionMedicamentos = (endpoint, method = 'GET') => {
     return fetch(endpoint, {
         method: method,
         headers: {
@@ -313,25 +162,25 @@ const configurarFetchCompositionMedicamentos =(endpoint, method = 'GET') => {
 const obtenerComposition = async (idDocRef) => {
     try {
         const response = await configurarFetchComposition(`${URL_BASE}/${pais}/fhir/DocumentReference/${idDocRef}`);
-        if (response.ok){
+        if (response.ok) {
             console.log("Conexion realizada Composition")
             let datosComposition = await response.json();
             console.log("datosComposition", datosComposition)
-            if (datosComposition.content[0].url !== ""){
+            if (datosComposition.content[0].url !== "") {
                 let fullUrl = datosComposition.content[0].attachment.url;
                 let splitUrl = fullUrl.split("/");
                 idComposition = splitUrl[6];
-                region =splitUrl[3]
+                region = splitUrl[3]
                 await obtenerCompositionMedicamentos(region, idComposition);
                 await obtenerCompositionAlergias(region, idComposition);
                 await obtenerCompositionDiagnosticos(region, idComposition);
-            }else {
+            } else {
                 console.log("No existen datos del composition para el paciente")
             }
-        }else if (response.status === 401){
+        } else if (response.status === 401) {
             console.log("Invalid API-KEY");
         }
-        else{
+        else {
             console.log("Error:", response.statusText);
         }
     }
@@ -346,27 +195,27 @@ const obtenerComposition = async (idDocRef) => {
 const obtenerDocument = async (territorio, idComposition) => {
     try {
         const responseDocument = await configurarfetchDocument(`https://ihce.ihcecol.gov.co/${territorio}/fhir/Composition/${idComposition}/$document`);
-        if (responseDocument.ok){
+        if (responseDocument.ok) {
             console.log("Conexión Realizada a $document");
             let datosDocument = await responseDocument.json();
             if (datosDocument.entry && datosDocument.entry.length > 0) {
                 const recursoPractitioner = datosDocument.entry.find(entry => entry.resource.resourceType === 'Practitioner')
 
-                if (recursoPractitioner){
+                if (recursoPractitioner) {
                     const code = recursoPractitioner.resource.identifier[0].type.coding[0].code;
                     const value = recursoPractitioner.resource.identifier[0].value;
                     // Retornar code y value
                     return { code, value };
-                }else {
+                } else {
                     console.log("No Existe recurso Practitioner");
                     return null;
                 }
-            }else{
+            } else {
                 console.log("no se encuentra el entry Practitioner");
                 return null;
             }
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
@@ -375,7 +224,7 @@ const obtenerDocument = async (territorio, idComposition) => {
 const obtenerCompositionMedicamentos = async (region, idComposition) => {
     try {
         const responseCompositionMedicamentos = await configurarFetchCompositionMedicamentos(`${URL_BASE}/${region}/fhir/Composition?_id=${idComposition}${URL_FINAL_MEDICAMENTOS}`)
-        if (responseCompositionMedicamentos.ok){
+        if (responseCompositionMedicamentos.ok) {
             console.log("Conexión Realizada composition Medicamentos")
             let datosCompositionMedicamentos = await responseCompositionMedicamentos.json();
             medicamentos = datosCompositionMedicamentos.entry.filter(medicamento => medicamento.resource && medicamento.resource.medicationCodeableConcept)
@@ -383,10 +232,10 @@ const obtenerCompositionMedicamentos = async (region, idComposition) => {
                     medicamento: medicamento.resource.medicationCodeableConcept.coding[0].display
                 }));
             mostrarMedicamentos(medicamentos);
-        }else{
+        } else {
             console.log("Error:", responseCompositionMedicamentos.statusText);
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
@@ -440,10 +289,10 @@ const obtenerCompositionAlergias = async (region, idComposition) => {
                 };
             });
             mostrarAlergias(alergias);
-        }else{
+        } else {
             console.log("Error:", responseCompositionMedicamentos.statusText);
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
@@ -453,71 +302,81 @@ const obtenerCompositionAlergias = async (region, idComposition) => {
 const obtenerCompositionDiagnosticos = async (region, idComposition) => {
     try {
         const respuestaInfoDiagnosticos = await configurarFetchDiagnosticos(`${URL_BASE}/${region}/fhir/Composition?_id=${idComposition}${URL_FINAL_DIAGNOSTICOS}`);
-        if (respuestaInfoDiagnosticos.ok){
+        if (respuestaInfoDiagnosticos.ok) {
             console.log("Conexión Realizada composition Diagnosticos");
             let datosCompositionDiagnosticos = await respuestaInfoDiagnosticos.json();
             diagnosticos = datosCompositionDiagnosticos.entry.filter(diagnostico => diagnostico.resource && diagnostico.resource.code)
                 .map(diagnostico => ({
-                    diagnostico : diagnostico.resource.code.coding[0].display
+                    diagnostico: diagnostico.resource.code.coding[0].display
                 }))
             mostrarDiagnosticos(diagnosticos);
-        }else{
+        } else {
             console.log("Error:", responseCompositionMedicamentos.statusText);
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
 
-
-
 const obtenerYConsultar = async (identificacion, tipoDocumento) => {
-    const urlPatient = await obtenerDocumentReference(identificacion, tipoDocumento);
-    if (!urlPatient) {
-        console.log("urlPatient no encontrado", urlPatient);
-        return;
-    }
-    ocultarSpinner();
-    await obtenerInfoPaciente(urlPatient);
+    try {
+        mostrarSpinner();
+        const response = await fetch(`/visor/documentReference?tipoDocumento=${tipoDocumento}&documento=${identificacion}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-    if (idDocRef) {
-        await obtenerComposition(idDocRef);
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        console.log("data", data)
+
+        if (data.paciente == null) {
+            var notyf = new Notyf({
+                duration: 2000,
+                position: {
+                    x: 'right',
+                    y: 'top',
+                }
+            });
+            notyf.error('Paciente no Existe');
+            ocultarSpinner();
+            return; // Detenemos la ejecución si no hay resultados 
+        }
+
+        const { organizacionArregloDocReference, paciente, urlPatient } = data;
+
+        /*console.log("urlPatient", urlPatient)
+        console.log("organizacionArregloDocReference", organizacionArregloDocReference)
+        console.log("paciente", paciente)*/
+        mostrarPatient(paciente);
+        if (!urlPatient) {
+            console.log("urlPatient no encontrado", urlPatient);
+            return;
+        }
+
+        ocultarSpinner();
+        arrayDocumentReference(organizacionArregloDocReference);
+
+        /*if (idDocRef) {
+            await obtenerComposition(idDocRef);
+        }*/
+
+    } catch (error) {
+        console.error('Error al obtener y consultar:', error);
+        var notyf = new Notyf({
+            duration: 2000, position:
+            {
+                x: 'right',
+                y: 'top',
+            }
+        });
+        notyf.error(`Error al obtener datos: ${error.message}`);
+        ocultarSpinner();
     }
 };
-
-//****************Informacion InfoPaciente********************
-
-const obtenerInfoPaciente = async() =>{
-    try {
-        const responsePatient = await configurarFetchPat(`${URL_BASE}${urlPatient}`);
-        if (responsePatient.ok) {
-            console.log("Conexion Realizada Patiente");
-            const datosPatient = await responsePatient.json();
-            mostrarPatient(datosPatient);
-            ocultarSpinner();
-        }else if (responsePatient.status === 401){
-            console.log("Unauthorized: Invalid API key")
-        }else {
-            console.log("Error:", responsePatient.statusText);
-        }
-    }catch (error){
-        console.log("Error:", error);
-    }
-}
-
-//****************Informacion InfoPaciente********************
-
-//function mostrar composition
-/*function mostrarDocumentReference(info) {
-    containerComposition.innerHTML = `
-            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><span>Autor: ${info.autor}</span></li>
-                <li class="breadcrumb-item active" aria-current="page"><span>Fecha: ${info.fecha}</span></li>
-              </ol>
-            </nav>
-    `;
-};*/
 
 //function mostrar patient
 function mostrarPatient(infoPatient) {
@@ -542,92 +401,7 @@ function mostrarPatient(infoPatient) {
 }
 
 
-//function mostrar Medicamentos
-function mostrarMedicamentos(infoMedicamentos) {
-
-    if (infoMedicamentos.length > 0) {
-        containerMedicamentos.innerHTML = `
-        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-            <ol class="list-group list-group-numbered">
-                ${infoMedicamentos.map(medicamento => `
-                    <li>
-                        <span>Medicamento > ${medicamento.medicamento}</span>
-                    </li>
-                `).join(' ')}
-            </ol>
-        </nav>
-    `;
-    }else{
-        containerMedicamentos.innerHTML = `
-        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-            <ol class="list-group list-group-numbered">
-                <li>
-                    <span>No existen medicamentos asociados</span>
-                </li>
-            </ol>
-        </nav>
-    `;
-    }
-}
-
-//function mostrar Alergias
-function mostrarAlergias(infoAlergias){
-
-    if (infoAlergias.length > 0){
-        containerAlergias.innerHTML = `
-            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-            <ol class="list-group list-group-numbered">
-                ${infoAlergias.map(alergia => `
-                    <li>
-                        <span>Alergia > ${alergia.alergia}</span>
-                    </li>
-                `).join(' ')}
-            </ol>
-        </nav>
-        </nav>
-        `;
-    }else{
-        containerAlergias.innerHTML = `
-        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-            <ol class="list-group list-group-numbered">
-                <li>
-                    <span>No existen Alergias asociadas al paciente</span>
-                </li>
-            </ol>
-        </nav>
-    `;
-    }
-}
-
-//function mostrar Diagnosticos
-
-function mostrarDiagnosticos(infoDiagnosticos) {
-    if (infoDiagnosticos.length > 0){
-        containerDiagnosticos.innerHTML = `
-            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-                <ol class="list-group list-group-numbered">
-                    ${infoDiagnosticos.map(diagnostico => `
-                        <li>
-                            <span>Diagnostico > ${diagnostico.diagnostico}</span>
-                        </li>
-                    `).join(' ')}
-                </ol>
-            </nav>
-        `;
-    }else {
-        containerDiagnosticos.innerHTML = `
-            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-                <ol class="list-group list-group-numbered">
-                        <li>
-                            <span>No existen Alergias asociadas al paciente</span>
-                        </li>
-                </ol>
-            </nav>
-        `
-    }
-}
-
-const obtenerInfoPacienteDos = async() =>{
+const obtenerInfoPacienteDos = async () => {
     try {
         const responsePatient = await configurarFetchPat(`${URL_BASE}${urlPatient}`);
         if (responsePatient.ok) {
@@ -635,18 +409,18 @@ const obtenerInfoPacienteDos = async() =>{
             const datosPatient = await responsePatient.json();
             console.log("info paciente", datosPatient);
             return datosPatient;
-        }else if (responsePatient.status === 401){
+        } else if (responsePatient.status === 401) {
             console.log("Unauthorized: Invalid API key")
-        }else {
+        } else {
             console.log("Error:", responsePatient.statusText);
         }
-    }catch (error){
+    } catch (error) {
         console.log("Error:", error);
     }
 }
 
 
-const obtenerPais = async(codPais) => {
+const obtenerPais = async (codPais) => {
     if (!pais) {
         return "Código de país inválido";
     }
@@ -679,17 +453,8 @@ const obtenerPais = async(codPais) => {
 };
 
 async function arrayDocumentReference(arreglo) {
-    arregloReference = arreglo.map(entry => ({
-        id: entry.idDocRef,
-        fechaDocumentReference: entry.fecha,
-        infoDocument: `${entry.region} - ${entry.autor} - ${entry.fecha}`,
-        code: entry.code,    // Practitioner code
-        value: entry.value,  // Practitioner value
-    }));
-
-    arregloReference.sort((a, b) => new Date(b.fechaDocumentReference) - new Date(a.fechaDocumentReference));
-
-    const breadcrumbItems = arregloReference.map(ref => `
+    console.log("arreglo", arreglo)
+    const breadcrumbItems = arreglo.map(ref => `
         <li class="list-group-item" data-id="${ref.id}" data-code="${ref.code}" data-value="${ref.value}">
             <span>${ref.infoDocument}</span>
         </li>
@@ -710,15 +475,16 @@ async function arrayDocumentReference(arreglo) {
             const code = item.getAttribute('data-code');    // Obtener code del practitioner
             const value = item.getAttribute('data-value');  // Obtener value del practitioner
 
-            // Obtener la Composition y el paciente
+            // Obtener Composition y el paciente
             const compositions = await obtenerCompositionDos(idDocRef);
+            console.log("compositions", compositions)
             const patient = await obtenerInfoPacienteDos(); // Obtener datos del paciente
             console.log("patient desde obtenerInfoPacienteDos", patient)
 
-            if (patient){
+            if (patient) {
                 if (patient.extension && Array.isArray(patient.extension) && patient.extension.length > 0) {
 
-                }else {
+                } else {
                     console.warn("La propiedad 'extension' no está presente o no es un array en 'patient'.");
                 }
 
@@ -731,8 +497,8 @@ async function arrayDocumentReference(arreglo) {
     });
 }
 
-function obtenerRelacionDocumentReference(arreglo){
-    relacionReference = arreglo.entry.map(entry =>{
+function obtenerRelacionDocumentReference(arreglo) {
+    relacionReference = arreglo.entry.map(entry => {
         const reference = entry.resource.id;
         return {
             reference: reference,
@@ -802,12 +568,12 @@ const obtenerMedicamentos2 = async (region, IdComposition) => {
 
                 }));
             return medicamentos
-        }else if (response.status === 401) {
+        } else if (response.status === 401) {
             console.log("Invalid API-KEY");
-        }else{
+        } else {
             console.log("Error:", response.statusText);
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
@@ -855,7 +621,7 @@ const obtenerCompositionAlergias2 = async (region, idComposition) => {
 
                 if (display) {
                     code = alergia.resource.extension[0].valueCodeableConcept.coding[0].code;
-                    codeText =  alergia.resource.code?.text;
+                    codeText = alergia.resource.code?.text;
                 }
 
                 return {
@@ -880,65 +646,32 @@ const obtenerCompositionAlergias2 = async (region, idComposition) => {
 const obtenerDiagnosticos2 = async (region, idComposition) => {
     try {
         const response = await configurarFetchDiagnosticos(`${URL_BASE}/${region}/fhir/Composition?_id=${idComposition}${URL_FINAL_DIAGNOSTICOS}`);
-        if (response.ok){
+        if (response.ok) {
             const responseDiagnostico2 = await response.json();
             console.log("Diagnosticos", responseDiagnostico2)
             const diagnosticos2 = responseDiagnostico2.entry.filter(diagnostico => diagnostico.resource.code)
                 .map(diagnostico => {
-                    if (diagnostico.resource.code.coding[0].display){
+                    if (diagnostico.resource.code.coding[0].display) {
                         return {
                             codeDiagnostico: diagnostico.resource.code.coding[0].code,
                             diagnostico: diagnostico.resource.code.coding[0].display
                         };
-                    }else{
+                    } else {
                         return {
                             diagnostico: "No relacionaron el display del diagnostico"
                         };
                     }
                 });
             return diagnosticos2;
-        }else if (response.status === 401) {
+        } else if (response.status === 401) {
             console.log("Invalid API-KEY");
-        }else{
+        } else {
             console.log("Error:", response.statusText);
         }
-    }catch (error) {
+    } catch (error) {
         console.error('Error:', error);
     }
 }
-
-// const mostrarModalRda = (composition) => {
-//     let modalContent = document.getElementById("mostrarCompositions");
-//     modalContent.innerHTML = '';
-//
-//     if (composition && composition.idDocRef) {
-//         let content = `
-//             <div>
-//                 <h5>* Esta informacion corresponde al DocumentReference almacenado en el nodo Nacional con el id <u><span style="color: red; font-weight: bold;">${composition.idDocRef}</u></span></h5>
-//                 <br>
-//                 <h4>Medicamentos:</h4>
-//                 <ul>
-//                     <span style="color: darkgreen; font-weight: bold;">${composition.medicamentos.map(m => `<li>${m.medicamento}</li>`).join('')}</span>
-//                 </ul>
-//                 <br>
-//                 <h4>Alergias:</h4>
-//                 <ul>
-//                     <span style="color: red; font-weight: bold;">${composition.alergias.map(a => `<li>${a.alergia}</li>`).join('')}</span>
-//                 </ul>
-//                 <br>
-//                 <h4>Diagnósticos:</h4>
-//                 <ul>
-//                     <span style="color: #007bff; font-weight: bold;">${composition.diagnosticos.map(d => `<li>${d.diagnostico}</li>`).join('')}</span>
-//                 </ul>
-//             </div>
-//         `;
-//         modalContent.innerHTML = content;
-//     } else {
-//         modalContent.innerHTML = '<p>No hay información disponible para mostrar.</p>';
-//     }
-//
-//     $('#exampleModal').modal('show'); // Mostrar el modal (usando jQuery)
-// }
 
 
 const mostrarModalRda = async (composition, patient, code, value) => {
@@ -1012,7 +745,7 @@ const mostrarModalRda = async (composition, patient, code, value) => {
 
         if (patient.address && Array.isArray(patient.address) && patient.extension.length > 0) {
             ciudad = patient.address[0].city;
-        }else {
+        } else {
             //console.warn("La propiedad 'extension' no está presente o no es un array en 'patient.address.city'.");
             agregarMensajeError("La propiedad 'extension' no está presente o no es un array en 'patient.address.city'.");
         }
@@ -1165,7 +898,7 @@ const mostrarModalRda = async (composition, patient, code, value) => {
 };
 
 
-function calcularEdad (fecha){
+function calcularEdad(fecha) {
 
     let nacimiento = new Date(fecha);
 
@@ -1176,7 +909,7 @@ function calcularEdad (fecha){
     return edad;
 }
 
-function validarDiscapacidad (discapacidad) {
+function validarDiscapacidad(discapacidad) {
     if (!discapacidad) {
         return "Código de discapacidad inválido";
     }
@@ -1211,7 +944,7 @@ function validarIdentidadGenero(genero) {
 
     const resultadoGenero = identidadGenero.find(entry => entry.code === genero);
 
-    return resultadoGenero ? resultadoGenero.display: "No existe genero que comparar en el document";
+    return resultadoGenero ? resultadoGenero.display : "No existe genero que comparar en el document";
 }
 
 function validarEtnia(etnia) {
@@ -1226,7 +959,7 @@ function validarEtnia(etnia) {
     ];
 
     const resultadoEtnia = etnias.find(entry => entry.code === etnia);
-    return resultadoEtnia ? resultadoEtnia.display: "No existe etnia que comparar en el document"
+    return resultadoEtnia ? resultadoEtnia.display : "No existe etnia que comparar en el document"
 }
 
 
@@ -1238,7 +971,7 @@ function validarZonaResidencia(zona) {
 
     const resultadoZonaResidencia = zonaResidencia.find(entry => entry.code === zona);
 
-    return resultadoZonaResidencia ? resultadoZonaResidencia.display: "No existe zona que comparar en el document"
+    return resultadoZonaResidencia ? resultadoZonaResidencia.display : "No existe zona que comparar en el document"
 
 }/***** Version 2, traer la información correspondient a cada uno de los document reference *****/
 

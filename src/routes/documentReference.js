@@ -1,34 +1,27 @@
-import express, { Router } from 'express';
-import fetch from 'node-fetch';
-import { baseUrl, fhirRegionId, apiKey } from '../config/config.js';
+import { Router } from 'express';
+import { obtenerYConsultar, arrayDocumentReference, arrayObtenerTerritorioCompositions, obtenerMedicamentosDiagnosticosAlergias } from '../services/services.js'
 
 const router = Router();
 
 router.get('/documentReference', async (req, res) => {
-    const documento = '52700583';
-    const tipoDocumento = 'CC';
+    const documento = req.query.documento;
+    const tipoDocumento = req.query.tipoDocumento;
 
     try {
-        const url = `${baseUrl}${fhirRegionId}/fhir/DocumentReference?patient.identifier=${documento}&patient.identifier-type=${tipoDocumento}&_count=800&_sort=-_lastUpdated`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'x-api-key': `${apiKey}`
-            },
-            mode: "cors",
-            cache: "default",
-        });
-        
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        
-        const datos = response.json();
-        res.json(datos);
+        const { processedDocumentReferences, paciente, urlPatient } = await obtenerYConsultar(documento, tipoDocumento);
+        const organizacionArregloDocReference = await arrayDocumentReference(processedDocumentReferences);
+        const relacionTerritorioCompositions = await arrayObtenerTerritorioCompositions(processedDocumentReferences);
+        const obtenerMedicamentosDiagnosticosAlergiasPaciente = await obtenerMedicamentosDiagnosticosAlergias(relacionTerritorioCompositions);
+
+        res.json({ organizacionArregloDocReference, paciente, urlPatient, relacionTerritorioCompositions, obtenerMedicamentosDiagnosticosAlergiasPaciente });
+
     } catch (error) {
-        console.error('Error fetching patient data:', error);
-        res.status(500).json({ error: 'Error al obtener datos del paciente' });
-        }
+        console.error('Error detallado:', error);
+        res.status(500).json(
+            {
+                error: 'Error al obtener datos del paciente', details: error.message
+            });
+    }
 });
 
 export default router;

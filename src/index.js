@@ -1,14 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
-import { resolve } from 'path';
-import { fileURLToPath } from 'url';
-import path from 'path';
-
 import documentReferenceRouter from './routes/documentReference.js';
-import indexRouter from './routes/index.js';
+import indexRoutes from './routes/index.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 
 const app = express();
 // Settings
@@ -20,12 +20,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Static files
-const publicDirectoryPath = resolve(__dirname, 'public');
-app.use(express.static(publicDirectoryPath));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
-app.use('/', indexRouter);
-app.use('/api', documentReferenceRouter);
+app.use('/', indexRoutes);
+app.use('/visor', documentReferenceRouter);
 
 // Start the server
 app.listen(app.get('port'), () => {
