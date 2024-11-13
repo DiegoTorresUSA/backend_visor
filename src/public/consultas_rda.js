@@ -346,7 +346,7 @@ const obtenerYConsultar = async (identificacion, tipoDocumento) => {
             return; // Detenemos la ejecución si no hay resultados 
         }
 
-        const { organizacionArregloDocReference, paciente, urlPatient } = data;
+        const { organizacionArregloDocReference, paciente, urlPatient, obtenerMedicamentosDiagnosticosAlergiasPaciente } = data;
 
         /*console.log("urlPatient", urlPatient)
         console.log("organizacionArregloDocReference", organizacionArregloDocReference)
@@ -453,7 +453,6 @@ const obtenerPais = async (codPais) => {
 };
 
 async function arrayDocumentReference(arreglo) {
-    console.log("arreglo", arreglo)
     const breadcrumbItems = arreglo.map(ref => `
         <li class="list-group-item" data-id="${ref.id}" data-code="${ref.code}" data-value="${ref.value}">
             <span>${ref.infoDocument}</span>

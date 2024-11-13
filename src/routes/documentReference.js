@@ -13,7 +13,7 @@ router.get('/documentReference', async (req, res) => {
         const relacionTerritorioCompositions = await arrayObtenerTerritorioCompositions(processedDocumentReferences);
         const obtenerMedicamentosDiagnosticosAlergiasPaciente = await obtenerMedicamentosDiagnosticosAlergias(relacionTerritorioCompositions);
 
-        res.json({ organizacionArregloDocReference, paciente, urlPatient, relacionTerritorioCompositions, obtenerMedicamentosDiagnosticosAlergiasPaciente });
+        res.json({ organizacionArregloDocReference, paciente, urlPatient, obtenerMedicamentosDiagnosticosAlergiasPaciente });
 
     } catch (error) {
         console.error('Error detallado:', error);

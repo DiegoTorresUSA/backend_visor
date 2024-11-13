@@ -229,10 +229,6 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
     // Mapea los territorios y composiciones para hacer múltiples solicitudes
 
     const results = await Promise.all(arregloterritoriosComposition.map(async (entry) => {
-        let display = "";
-        let code = "";
-        let codeText = "";
-
         const url = `${baseUrl}${entry.region}/fhir/Composition/${entry.idComposition}/$document`;
         console.log("url", url)
 
@@ -266,15 +262,25 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
             const alergias = datos.entry.filter(alergia => {
                 const display = alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display || alergia.resource.code?.text;
                 return display !== undefined;
-            })
-                .map(alergia => {
+            }).map(alergia => {
                     let display = null; // Intenta obtener el display desde extension 
-                    if (alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display) { display = alergia.resource.extension[0].valueCodeableConcept.coding[0].display; } // Si el display es "Medicamento", volverlo nulo 
-                    if (display === "Medicamento") { display = null; } // Si el display es nulo, intenta obtenerlo desde code 
-                    if (!display && alergia.resource.code?.text) { display = alergia.resource.code.text; } // Si no se encontró en ninguno o es nulo, asigna un mensaje por defecto 
-                    if (!display) { display = "No relacionaron el display de la alergia"; } // Asegúrate de que todas las propiedades existen antes de intentar acceder a ellas 
+                    if (alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display) 
+                        { 
+                            display = alergia.resource.extension[0].valueCodeableConcept.coding[0].display; 
+                        } // Si el display es "Medicamento", volverlo nulo 
+                    if (display === "Medicamento") { 
+                        display = null; 
+                    } // Si el display es nulo, intenta obtenerlo desde code 
+                    if (!display && alergia.resource.code?.text) { 
+                        display = alergia.resource.code.text; 
+                    } // Si no se encontró en ninguno o es nulo, asigna un mensaje por defecto 
+                    if (!display) { 
+                        display = "No relacionaron el display de la alergia"; 
+                    } // Asegúrate de que todas las propiedades existen antes de intentar acceder a ellas 
+                    
                     const code = alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.code || "N/A";
                     const codeText = alergia.resource.code?.text || "N/A";
+                    
                     return {
                         code,
                         display,
@@ -282,21 +288,15 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
                     };
                 });
 
-
-            const diagnosticos = datos.entry.filter(diagnostico => diagnostico.resource && diagnostico.resource.code)
-                .map(diagnostico => {
-                    if (diagnostico.resource.code.coding[0].display) {
-                        return {
-                            codeDiagnostico: diagnostico.resource.code.coding[0].code,
-                            diagnostico: diagnostico.resource.code.coding[0].display
-                        };
-                    } else {
-                        return {
-                            diagnostico: "No relacionaron el display del diagnostico"
-                        };
-                    }
-                });
-            console.log("diagnosticos", diagnosticos)
+                const diagnosticos = datos.entry.filter(diagnostico => 
+                    diagnostico.resource?.resourceType === "Condition" && 
+                    diagnostico.resource.code?.coding?.[0]?.code && 
+                    diagnostico.resource.code?.coding?.[0]?.display)
+                    .map(diagnostico => ({ 
+                        codeDiagnostico: diagnostico.resource.code.coding[0].code || "N/A", 
+                        diagnostico: diagnostico.resource.code.coding[0].display || "N/A" 
+                    }));
+            console.log("diagnosticos Ultima Version", diagnosticos)
             return { medicamentos, alergias, diagnosticos };
 
         } catch (error) {
@@ -309,7 +309,6 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
         alergias: results.flatMap(result => result.alergias),
         diagnosticos: results.flatMap(result => result.diagnosticos)
     };
-    console.log("combinedResults", combinedResults);
     return combinedResults;
 }
 
@@ -352,7 +351,8 @@ export const obtenerYConsultar = async (identificacion, tipoDocumento) => {
         return {
             processedDocumentReferences,
             urlPatient,
-            paciente
+            paciente,
+            idDocRef
         };
 
     } catch (error) {
