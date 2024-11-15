@@ -1,7 +1,6 @@
 # backend_visor
+
 Repositorio Backend_visorQA
-
-
 
 ## Descripción
 
@@ -13,52 +12,93 @@ La **Plataforma Web** desarrollada para el Ministerio de Salud y Protección Soc
 - **Diagnósticos**
 - **Atenciones médicas**
 
-
 ## Tecnologías utilizadas
 
-* **Frontend:** HTML, BOOTSTRAP y CSS
-* **Backend:** Node.js, Express.js
+- **Frontend:** HTML, BOOTSTRAP y CSS
+- **Backend:** Node.js, Express.js
 
 ## Instalación y configuración
 
 ### Requisitos previos
-* Node.js (versión 14 o superior)
-* npm (o yarn)
-* Un editor de código (Visual Studio Code, Sublime Text, etc.)
+
+- Node.js (versión 14 o superior)
+- npm (o yarn)
+- Un editor de código (Visual Studio Code, Sublime Text, etc.)
 
 ### Clonar el repositorio
+
 ```bash
 git clone https://github.com/DiegoTorresUSA/backend_visor
 cd backend_visor
 ```
 
 ### Instalar Depedencias
+
 ```bash
 npm install
 ```
 
+### Configuración de Variables de Entorno
+
+```bash
+Para configurar este proyecto, es necesario crear un archivo .env en la raíz del proyecto. Este archivo almacenará las variables de entorno necesarias para que la aplicación funcione correctamente.
+
+- Crear un archivo .env en la raíz del proyecto.
+
+- Añadir las variables proporcionadas en el siguiente ejemplo, reemplazando los valores según necesidades.
+
+# Configuración de APIs externas
+URL_BASE = URL_BASE
+FHIR_REGION_ID = FHIR_REGION_ID
+API_KEY_DR = API_KEY_DR
+API_KEY_PAT = API_KEY_PAT
+
+```
+
 ### Iniciar Aplicación
+
 ```bash
 npm start
 ```
 
 ### Acceder a la aplicación
+
 ```bash
 http://localhost:3000
 ```
 
+### Evidencia que el servidor está corriendo
 
+A continuación, se muestra un pantallazo del servidor en funcionamiento:
+
+<p align="center">
+  <img src="src/assets/Aplicacion.jpg" alt="Pantallazo de la Aplicación" width="600">
+</p>
+
+### Vista General de la Aplicación
+
+A continuación, se muestra un pantallazo de la aplicación en funcionamiento:
+
+<p align="center">
+  <img src="src/assets/consulta.jpg" alt="Pantallazo de la Aplicación" width="600">
+</p>
+
+Nota: Tener en cuenta que para ingresar al fommulario de consulta es: http://localhost:3000/consulta
 
 ### Estructura del Proyecto
 
 - **app/**: Contiene la lógica de la aplicación.
-  - **routes/**: Definición de rutas de la aplicación.
+
+- **pages/**: html del visor que se renderiza.
 
 - **public/**: Archivos públicos estáticos (CSS, JS, imágenes).
 
-- **.env**: Archivo de configuración de variables de entorno.
+- **routes/**: Definición de rutas de la aplicación y consumo de los servicios.
+- **services/**: Lógica de la aplicacion.
 
 - **index.js**: Punto de entrada de la aplicación.
+
+- **.env**: Archivo de configuración de variables de entorno.
 
 - **package.json**: Archivo de dependencias y scripts del proyecto.
 

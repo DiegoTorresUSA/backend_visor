@@ -146,13 +146,16 @@ export const obtenerDocumentReference = async (documento, tipoDocumento) => {
             );
             if (processedDocumentReferences && processedDocumentReferences.length > 0) {
                 const idDocRef = processedDocumentReferences[0]?.idDocRef || '';
-                console.log("idDocRef", idDocRef);
+                const code = processedDocumentReferences[0]?.code || '';
+                const value = processedDocumentReferences[0]?.value || '';
                 const urlPatient = processedDocumentReferences[0]?.urlPatientSinBarra || '';
 
                 return {
                     processedDocumentReferences,
                     urlPatient,
-                    idDocRef
+                    idDocRef,
+                    code,   // Practitioner code
+                    value, // Practitioner value
                 };
             }
             console.log('No se encontraron DocumentReference');
@@ -217,7 +220,6 @@ export const arrayObtenerTerritorioCompositions = async (documentReference) => {
                     return null;
                 }
             }));
-        console.log("REgion - Compositions", arregloReference)
         return arregloReference.filter(item => item !== null);
     } catch (error) {
         console.error('Error al procesar arregloReference:', error);
@@ -230,7 +232,6 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
 
     const results = await Promise.all(arregloterritoriosComposition.map(async (entry) => {
         const url = `${baseUrl}${entry.region}/fhir/Composition/${entry.idComposition}/$document`;
-        console.log("url", url)
 
         try {
             const response = await fetch(url, {
@@ -251,7 +252,6 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
             }
 
             const datos = await response.json();
-            //console.log("Datos:", JSON.stringify(datos, null, 2));
 
             const medicamentos = datos.entry.filter(medicamento => medicamento.resource && medicamento.resource.medicationCodeableConcept)
                 .map(medicamento => ({
@@ -263,40 +263,38 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
                 const display = alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display || alergia.resource.code?.text;
                 return display !== undefined;
             }).map(alergia => {
-                    let display = null; // Intenta obtener el display desde extension 
-                    if (alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display) 
-                        { 
-                            display = alergia.resource.extension[0].valueCodeableConcept.coding[0].display; 
-                        } // Si el display es "Medicamento", volverlo nulo 
-                    if (display === "Medicamento") { 
-                        display = null; 
-                    } // Si el display es nulo, intenta obtenerlo desde code 
-                    if (!display && alergia.resource.code?.text) { 
-                        display = alergia.resource.code.text; 
-                    } // Si no se encontró en ninguno o es nulo, asigna un mensaje por defecto 
-                    if (!display) { 
-                        display = "No relacionaron el display de la alergia"; 
-                    } // Asegúrate de que todas las propiedades existen antes de intentar acceder a ellas 
-                    
-                    const code = alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.code || "N/A";
-                    const codeText = alergia.resource.code?.text || "N/A";
-                    
-                    return {
-                        code,
-                        display,
-                        codeText
-                    };
-                });
+                let display = null; // Intenta obtener el display desde extension 
+                if (alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.display) {
+                    display = alergia.resource.extension[0].valueCodeableConcept.coding[0].display;
+                } // Si el display es "Medicamento", volverlo nulo 
+                if (display === "Medicamento") {
+                    display = null;
+                } // Si el display es nulo, intenta obtenerlo desde code 
+                if (!display && alergia.resource.code?.text) {
+                    display = alergia.resource.code.text;
+                } // Si no se encontró en ninguno o es nulo, asigna un mensaje por defecto 
+                if (!display) {
+                    display = "No relacionaron el display de la alergia";
+                } // Asegúrate de que todas las propiedades existen antes de intentar acceder a ellas 
 
-                const diagnosticos = datos.entry.filter(diagnostico => 
-                    diagnostico.resource?.resourceType === "Condition" && 
-                    diagnostico.resource.code?.coding?.[0]?.code && 
-                    diagnostico.resource.code?.coding?.[0]?.display)
-                    .map(diagnostico => ({ 
-                        codeDiagnostico: diagnostico.resource.code.coding[0].code || "N/A", 
-                        diagnostico: diagnostico.resource.code.coding[0].display || "N/A" 
-                    }));
-            console.log("diagnosticos Ultima Version", diagnosticos)
+                const code = alergia.resource.extension?.[0]?.valueCodeableConcept?.coding?.[0]?.code || "N/A";
+                const codeText = alergia.resource.code?.text || "N/A";
+
+                return {
+                    code,
+                    display,
+                    codeText
+                };
+            });
+
+            const diagnosticos = datos.entry.filter(diagnostico =>
+                diagnostico.resource?.resourceType === "Condition" &&
+                diagnostico.resource.code?.coding?.[0]?.code &&
+                diagnostico.resource.code?.coding?.[0]?.display)
+                .map(diagnostico => ({
+                    codeDiagnostico: diagnostico.resource.code.coding[0].code || "N/A",
+                    diagnostico: diagnostico.resource.code.coding[0].display || "N/A"
+                }));
             return { medicamentos, alergias, diagnosticos };
 
         } catch (error) {
@@ -315,7 +313,6 @@ export const obtenerMedicamentosDiagnosticosAlergias = async (arregloterritorios
 export const obtenerInfoPaciente = async (urlPatient) => {
     try {
         const url = `${baseUrl}${urlPatient}`;
-        console.log("url", url)
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -359,9 +356,4 @@ export const obtenerYConsultar = async (identificacion, tipoDocumento) => {
         console.error('Error detallado:', error); throw error;
     }
 };
-/*ocultarSpinner();
-await obtenerInfoPaciente(urlPatient);
- 
-if (idDocRef) {
-    await obtenerComposition(idDocRef);
-}*/
+
