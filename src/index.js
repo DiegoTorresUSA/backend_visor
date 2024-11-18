@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
 import documentReferenceRouter from './routes/documentReference.js';
+import routes from './routes/tableroControl.js';
 import indexRoutes from './routes/index.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,6 +26,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/', indexRoutes);
 app.use('/visor', documentReferenceRouter);
+app.use('/tablero', routes);
+
 
 // Start the server
 app.listen(app.get('port'), () => {

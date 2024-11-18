@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Tablero de Control</title>
+    <!-- Font Awesome para los iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="/style_tablero.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid" style="background-color: #3563d3">
+          <a
+            class="navbar-brand"
+            href="https://www.minsalud.gov.co/Portada2021/index.html"
+          >
+            <img
+              src="assets/img/logo_gov.co.svg"
+              alt="Logo"
+              class="d-inline-block align-text-top"
+            />
+          </a>
+        </div>
+      </nav>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container pt-3 pb-3">
+          <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a href="index.html" target="_self">
+                  <img
+                    src="https://www.minsalud.gov.co/LogosInstitucionales/Logo-potencia-de-la-vida.png"
+                    style="width: 50%"
+                    alt="Logo potencia de la vida"
+                  />
+                </a>
+              </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item servicio-li">
+                <img
+                  src="https://www.minsalud.gov.co/LogosInstitucionales/Escudo-Ministerio-de-salud.png"
+                  style="width: 90%"
+                  alt="Min Salud y Protección social"
+                />
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <br /><br /><br /><br /><br /><br /><br />
+
+    <div class="container-fluid">
+      <div class="d-flex justify-content-center">
+        <h1>Indicador Mecanismo IHCE-RDA en operación</h1>
+      </div>
+      <br /><br />
+      <div class="row align-items-start">
+        <div class="col">
+          <br /><br />
+          <div class="tab-content tab-transparent-content">
+            <div class="row align-items-center" id="datos"></div>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <div id="modelsChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spinner Modal -->
+    <div
+      class="modal fade"
+      id="loadingModal"
+      tabindex="-1"
+      aria-labelledby="loadingModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3">Consultando Información...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script
+      src="https://kit.fontawesome.com/f326d0e023.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="/consultaMetricas.js"></script>
+  </body>
+</html>

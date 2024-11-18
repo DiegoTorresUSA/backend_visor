@@ -6,13 +6,17 @@ const router = Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 router.get('/', (req, res) => {
-    res.json({'title': 'Hello World'});
-     });
+    res.json({ 'title': 'Hello World' });
+});
 
 
 router.get("/consulta", (req, res) => {
     res.sendFile(join(__dirname, "../pages/visor.html"));
 });
-    
 
-     export default router;
+router.get("/tableroControl", (req, res) => {
+    res.sendFile(join(__dirname, "../pages/tableroControl.html"));
+});
+
+
+export default router;

@@ -1,40 +1,49 @@
-:root{
-    --background-ms: red;
-    i.material-icons { color: crimson !important; }
+:root {
+  --background-ms: red;
+  i.material-icons {
+    color: crimson !important;
+  }
 }
 
-*{
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: "Be Vietnam Pro", sans-serif;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Be Vietnam Pro", sans-serif;
 }
 
-header{
-    height: 70px;
+header {
+  height: 70px;
 }
 
-.align-text-top{
-    height: 70px;
+.align-text-top {
+  height: 70px;
 }
 
-.navbar{
-    margin: 0;
-    padding: 0 !important;
+.navbar {
+  margin: 0;
+  padding: 0 !important;
 }
 
-.container{
-    display: flex;
+.container {
+  display: flex;
 }
-figure, canvas {
-    background-color: rgba(255,255,255,.03);
-    padding: 10px 10px 30px;
-    text-align: center;
+figure,
+canvas {
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 10px 10px 30px;
+  text-align: center;
 }
-
 
 .cols-2 > * {
-    width: 65%;
-    margin: 10px;
-    justify-content: center;
+  width: 65%;
+  margin: 10px;
+  justify-content: center;
+}
+
+.chart-container {
+  position: relative;
+  margin: auto;
+  width: 100%;
+  background-color: white;
 }
