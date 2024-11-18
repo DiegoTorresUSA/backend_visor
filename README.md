@@ -50,9 +50,10 @@ Para configurar este proyecto, es necesario crear un archivo .env en la raíz de
 # Configuración de APIs externas
 URL_BASE = URL_BASE
 FHIR_REGION_ID = FHIR_REGION_ID
+URL_BASE_REGION = URL_BASE_REGION
+URL_BASE_PRESTADOR = URL_BASE_PRESTADOR
 API_KEY_DR = API_KEY_DR
 API_KEY_PAT = API_KEY_PAT
-
 ```
 
 ### Iniciar Aplicación
@@ -75,7 +76,7 @@ A continuación, se muestra un pantallazo del servidor en funcionamiento:
   <img src="src/assets/Aplicacion.jpg" alt="Pantallazo de la Aplicación" width="600">
 </p>
 
-### Vista General de la Aplicación
+### Vista General de la Aplicación de Consulta
 
 A continuación, se muestra un pantallazo de la aplicación en funcionamiento:
 
@@ -84,6 +85,16 @@ A continuación, se muestra un pantallazo de la aplicación en funcionamiento:
 </p>
 
 Nota: Tener en cuenta que para ingresar al fommulario de consulta es: http://localhost:3000/consulta
+
+### Vista General de la Aplicación del Tablero de Seguimiento
+
+A continuación, se muestra un pantallazo de la aplicación en funcionamiento:
+
+<p align="center">
+  <img src="src/assets/tablero.jpg" alt="Pantallazo de la Aplicación" width="600">
+</p>
+
+Nota: Tener en cuenta que para ingresar al fommulario de consulta es: http://localhost:3000/tableroControl
 
 ### Estructura del Proyecto
 
