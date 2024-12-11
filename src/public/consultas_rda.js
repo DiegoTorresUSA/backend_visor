@@ -125,7 +125,7 @@ function mostrarPatient(infoPatient) {
     `;
 }
 
-const obtenerPais = async (codPais) => {
+/*const obtenerPais = async (codPais) => {
     if (!codPais) {
         return "Código de país inválido";
     }
@@ -152,7 +152,7 @@ const obtenerPais = async (codPais) => {
         console.error('Error:', error);
         return null; // Or throw an error if needed
     }
-};
+};*/
 
 async function arrayDocumentReference(arregloDocuments, paciente) {
     const breadcrumbItems = arregloDocuments.map(ref => `
@@ -193,6 +193,7 @@ async function arrayDocumentReference(arregloDocuments, paciente) {
 }
 
 const mostrarModalRda = async (arregloCompositions, data, value, code, patient, idDocRef) => {
+    console.log("patient", patient)
     const notificationContainer = document.createElement('div');
     notificationContainer.classList.add('custom-notification');
 
@@ -208,6 +209,7 @@ const mostrarModalRda = async (arregloCompositions, data, value, code, patient, 
     let idZonaResidencia = null;
     let mensajesError = [];
     let ciudad = null;
+    let sexo = null;
 
     try {
         if (patient.extension && Array.isArray(patient.extension) && patient.extension.length > 0) {
@@ -223,13 +225,37 @@ const mostrarModalRda = async (arregloCompositions, data, value, code, patient, 
         }
 
         if (patient.address) {
-            idPais = await obtenerPais(patient.address[0].country);
+            idPais = patient.address[0].country;
+            if (idPais === "170"){
+                idPais = "Colombia"
+            } 
         } else {
             agregarMensajeError("La propiedad 'extension' no está presente o no es un array en 'patient.pais'.");
         }
 
+        if (patient.gender) {
+            sexo = patient.gender;
+            if (sexo === "female"){
+                sexo = "Mujer"
+            } 
+
+            if (sexo === "male"){
+                sexo = "Hombre"
+            }
+            
+            if (sexo === "unknown" || sexo === "other"){
+                sexo = "Indeterminado / Intersexual"
+            }
+        } else {
+            agregarMensajeError("La propiedad 'extension' no está presente o no es un array en 'patient.pais'.");
+        }
+
+
         if (patient.extension && Array.isArray(patient.extension) && patient.extension.length > 0) {
             idPaisResidencia = patient.address[0].country;
+            if (idPaisResidencia === "170"){
+                idPaisResidencia = "Colombia"
+            } 
         } else {
             agregarMensajeError("La propiedad 'extension' no está presente o no es un array en 'patient.Residencia'.");
         }
@@ -295,7 +321,7 @@ const mostrarModalRda = async (arregloCompositions, data, value, code, patient, 
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Género:</strong> ${patient.gender}</p>
+                                <p><strong>Sexo Biológico:</strong> ${sexo}</p>
                             </div>
                                         <div class="col-md-6">
                                 <p><strong>Pais de Nacimiento:</strong> ${idPais}</p>
