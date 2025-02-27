@@ -34,44 +34,37 @@ export const obtenerRegion = async (region) => {
 export const obtenerDocument = async (territorio, idComposition) => {
     try {
         const url = `${baseUrl}${territorio}/fhir/Composition/${idComposition}/$document`;
+        console.log("URL de la consulta:", url);
+
         const response = await fetch(url, {
             method: 'GET',
-            headers: {
-                "x-api-key": apiKey
-            },
+            headers: { "x-api-key": apiKey },
             mode: "cors",
             cache: "default"
         });
 
-        if (response.status === 401) {
-            throw new Error("Unauthorized: Invalid API key");
+        console.log("Response Status:", response.status);
+        console.log("Response Headers:", response.headers.get("content-type"));
+
+        // Obtener la respuesta en texto sin procesarla aún
+        const rawResponse = await response.text();
+        console.log("Raw Response:", rawResponse);
+
+        // Validar que el Content-Type contenga "json"
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("json")) {
+            console.warn("⚠️ Posible respuesta no válida, Content-Type:", contentType);
+            throw new Error(`⚠️ El servidor devolvió una respuesta no válida (no es JSON).`);
         }
 
-        if (!response.ok) {
-            throw new Error('No fue posible la conexión con el servidor.');
-        }
-
-        const datosDocument = await response.json();
-
-        if (!datosDocument.entry || datosDocument.entry.length === 0) {
-            console.log("No se encuentra la entry practitioner");
-            return null;
-        }
-
-        const recursoPractitioner = datosDocument.entry.find(entry => entry.resource.resourceType === 'Practitioner');
-
-        if (!recursoPractitioner) {
-            console.log("No Existe recurso Practitioner");
-            return null;
-        }
-        const code = recursoPractitioner.resource.identifier[0].type.coding[0].code;
-        const value = recursoPractitioner.resource.identifier[0].value;
-        // Retornar code y value
-        return { code, value };
+        // Convertir a JSON y retornar
+        const data = JSON.parse(rawResponse);
+        console.log("Response JSON:", data);
+        return data;
 
     } catch (error) {
-        console.error('Error:', error);
-        return null; // Or throw an error if needed
+        console.error("Error en obtenerDocument:", error);
+        return null;
     }
 };
 
@@ -83,7 +76,9 @@ export const extractDataFromUrl = (attachmentUrl) => {
 export const obtenerDocumentReference = async (documento, tipoDocumento) => {
 
     try {
+        console.log("entre a traer los document reference",documento, tipoDocumento )
         const url = `${baseUrl}${fhirRegionId}/fhir/DocumentReference?patient.identifier=${documento}&patient.identifier-type=${tipoDocumento}&_count=800&_sort=-_lastUpdated`;
+        console.log("url consulta Document Reference", url)
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -93,8 +88,13 @@ export const obtenerDocumentReference = async (documento, tipoDocumento) => {
             cache: "default",
         });
 
-        if (!response.ok) throw new Error('No fue posible la conexión con el servidor.');
-
+        if (!response.ok) {
+            const data = await response.json();
+            console.log("Response de la consulta", data);
+            throw new Error(`⚠️ Error en la consulta: ${response.status} - ${response.statusText}`);
+        }
+        
+        
         if (response.status === 401) {
             throw new Error("Unauthorized: Invalid API key");
         }
@@ -111,10 +111,12 @@ export const obtenerDocumentReference = async (documento, tipoDocumento) => {
         }
 
         if (datos.entry && datos.entry.length > 0) {
+            console.log("datos", datos)
             const processedDocumentReferences = await Promise.all(
                 datos.entry.map(async (entry) => {
                     // Create a closure function to capture entry for each iteration
                     const createDocumentObject = async () => {
+                        console.log("datos.entry", datos.entry)
                         let urlObjeto = entry.resource.subject.reference;
                         let urlExtraida = urlObjeto.substring(urlObjeto.indexOf('/', "https://".length));
                         const urlPatient = urlExtraida;
@@ -127,7 +129,10 @@ export const obtenerDocumentReference = async (documento, tipoDocumento) => {
                         let splitPartes = fullUrlDocRef.split("/");
                         const idDocRef = splitPartes.pop();
                         let attachmentUrl = entry.resource.content?.[0]?.attachment?.url;
+                        console.log("attachmentUrl", attachmentUrl)
                         const { territorio, idComposition } = extractDataFromUrl(attachmentUrl);
+                        console.log("territorio fuera del extractDataFromUrl ", territorio)
+                        console.log("territorio fuera del extractDataFromUrl ", idComposition)
                         // Obtener el code y value del practitioner
                         const { code, value } = await obtenerDocument(territorio, idComposition);
 
@@ -334,26 +339,49 @@ export const obtenerInfoPaciente = async (urlPatient) => {
 
 export const obtenerYConsultar = async (identificacion, tipoDocumento) => {
     try {
-        const { processedDocumentReferences, urlPatient, idDocRef } = await obtenerDocumentReference(identificacion, tipoDocumento);
+        console.log("Entre a obtener y Consultar", identificacion, tipoDocumento);
 
-        if (!urlPatient) {
+        const { processedDocumentReferences = [], urlPatient, idDocRef } = await obtenerDocumentReference(identificacion, tipoDocumento);
+        console.log("processedDocumentReferences", processedDocumentReferences)
+
+        if (!Array.isArray(processedDocumentReferences)) {
+            console.error("⚠️ processedDocumentReferences no es un array:", processedDocumentReferences);
             return {
                 processedDocumentReferences: [],
                 urlPatient: '',
-                paciente: null  // o {} dependiendo de la estructura que esperes para paciente
+                paciente: null  
+            };
+        }
+        //console.log("documentReferenceData", documentReferenceData)
+
+        if (!processedDocumentReferences || processedDocumentReferences.length === 0) {
+            console.warn("⚠️ No se encontraron DocumentReferences");
+            return {
+                processedDocumentReferences: [],
+                urlPatient: '',
+                paciente: null  
             };
         }
 
-        const paciente = await obtenerInfoPaciente(urlPatient)
-        return {
-            processedDocumentReferences,
-            urlPatient,
-            paciente,
-            idDocRef
-        };
+
+        if (!urlPatient) {
+            console.warn("⚠️ No se encontró información del paciente.");
+            return {
+                processedDocumentReferences,
+                urlPatient: '',
+                paciente: null
+            };
+        }
+
+        const paciente = await obtenerInfoPaciente(urlPatient);
+        
+        return { processedDocumentReferences, urlPatient, paciente, idDocRef };
 
     } catch (error) {
-        console.error('Error detallado:', error); throw error;
+        console.error("Error en obtenerYConsultar:", error.message);
+        throw error;
     }
 };
+
+
 
