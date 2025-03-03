@@ -60,8 +60,22 @@ export const obtenerDocument = async (territorio, idComposition) => {
         // Convertir a JSON y retornar
         const data = JSON.parse(rawResponse);
         console.log("Response JSON:", data);
-        return data;
 
+        if (!data.entry || data.entry.length === 0) {
+            console.log("No se encuentra la entry practitioner");
+            return null;
+        }
+
+        const recursoPractitioner = data.entry.find(entry => entry.resource.resourceType === 'Practitioner');
+        if (!recursoPractitioner) {
+            console.log("No Existe recurso Practitioner");
+            return null;
+        }
+        const code = recursoPractitioner.resource.identifier[0].type.coding[0].code;
+        const value = recursoPractitioner.resource.identifier[0].value;
+        return { code, value };
+
+        
     } catch (error) {
         console.error("Error en obtenerDocument:", error);
         return null;
