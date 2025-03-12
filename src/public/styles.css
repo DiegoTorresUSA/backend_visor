@@ -78,3 +78,101 @@ form > div{
     fill: #007bff; /* Cambia el color del SVG */
 }
 
+/* Estilos para la página de login */
+.login-page {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-header {
+    background-color: #3563d3;
+    height: 48px;
+}
+
+.login-header .navbar {
+    padding: 0;
+    height: 100%;
+}
+
+.login-main {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+.login-logo {
+    width: 140px;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+.login-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.login-card .card-header {
+    background: transparent;
+    padding-bottom: 0;
+}
+
+.login-card .bxs-user-circle {
+    color: #3563d3;
+    font-size: 2.5rem;
+}
+
+.login-form .input-group {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.login-form .input-group:focus-within {
+    border-color: #3563d3;
+}
+
+.login-form .input-group-text {
+    background-color: transparent;
+    padding: 0.75rem 1rem;
+}
+
+.login-form .form-control {
+    border: none;
+    padding: 0.75rem 0.5rem;
+    background-color: transparent;
+}
+
+.login-form .form-control:focus {
+    box-shadow: none;
+}
+
+.login-form .btn-primary {
+    background-color: #3563d3;
+    border: none;
+    font-weight: 500;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.login-form .btn-primary:hover {
+    background-color: #2850b8;
+    transform: translateY(-1px);
+}
+
+.login-form .bx {
+    font-size: 1.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-main {
+        padding: 1rem 0;
+    }
+    
+    .login-logo {
+        width: 120px;
+    }
+}

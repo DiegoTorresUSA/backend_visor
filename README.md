@@ -4,7 +4,7 @@ Repositorio Backend_visorQA
 
 ## Descripción
 
-La **Plataforma Web** desarrollada para el Ministerio de Salud y Protección Social está diseñada para facilitar la consulta y gestión de información clínica de los pacientes. Esta herramienta permite acceder a un repositorio unificado de datos, que incluye:
+La **Plataforma Web** desarrollada para el Ministerio de Salud y Protección Social está diseñada para facilitar la consulta de la información clínica de los pacientes, en el ejercicio de validación y pruebas de concepto de envío e intercambio de información por los diferentes prestadores de salud haci ael mecanismo de IHCE. Esta herramienta permite acceder a un repositorio unificado de datos, que incluye:
 
 - **Información sobre paciente**
 - **Medicamentos**
@@ -62,6 +62,12 @@ API_KEY_PAT = API_KEY_PAT
 npm start
 ```
 
+o 
+
+```bash
+npm run dev
+```
+
 ### Acceder a la aplicación
 
 ```bash
@@ -84,7 +90,7 @@ A continuación, se muestra un pantallazo de la aplicación en funcionamiento:
   <img src="src/assets/consulta.jpg" alt="Pantallazo de la Aplicación" width="600">
 </p>
 
-Nota: Tener en cuenta que para ingresar al fommulario de consulta es: http://localhost:3000/consulta
+Nota: Tener en cuenta que para ingresar al formulario de consulta es: http://localhost:3000/consulta
 
 ### Vista General de la Aplicación del Tablero de Seguimiento
 

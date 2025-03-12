@@ -7,12 +7,12 @@ const router = Router();
 router.get('/documentReference', async (req, res) => {
     const documento = req.query.documento;
     const tipoDocumento = req.query.tipoDocumento;
-    
-    console.log("Documento recibido:", documento);
-    console.log("Tipo de documento recibido:", tipoDocumento);
 
     try {
         const { processedDocumentReferences, paciente, urlPatient } = await obtenerYConsultar(documento, tipoDocumento);
+        console.log("processedDocumentReferences", processedDocumentReferences)
+        console.log("paciente", paciente)
+        console.log("urlPatient", urlPatient)
         const organizacionArregloDocReference = await arrayDocumentReference(processedDocumentReferences);
         const relacionTerritorioCompositions = await arrayObtenerTerritorioCompositions(processedDocumentReferences);
 

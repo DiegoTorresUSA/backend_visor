@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Visor Nacional Ministerio de Salud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="login-page">
+    <header class="login-header">
+      <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid" style="background-color: #3563d3">
+          <a class="navbar-brand" href="https://www.minsalud.gov.co/Portada2021/index.html">
+            <img src="assets/img/logo_gov.co.svg" alt="Logo" class="d-inline-block align-text-top" />
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="login-main">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-11 col-sm-8 col-md-6 col-lg-4">
+            <div class="text-center mb-4">
+              <img
+                src="https://www.minsalud.gov.co/LogosInstitucionales/Escudo-Ministerio-de-salud.png"
+                alt="Min Salud y Protección social"
+                class="login-logo"
+              />
+            </div>
+            <div class="card login-card">
+              <div class="card-header text-center border-0 pt-4">
+                <i class="bx bxs-user-circle"></i>
+                <h4 class="mt-2 mb-1">Iniciar Sesión</h4>
+                <p class="text-muted small mb-0">Visor Nacional Ministerio de Salud - QA</p>
+              </div>
+              <div class="card-body px-4 py-4">
+                <form id="loginForm" class="login-form">
+                  <div class="form-group mb-3">
+                    <div class="input-group">
+                      <span class="input-group-text bg-light border-0">
+                        <i class="bx bxs-user text-muted"></i>
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control ps-2"
+                        id="username"
+                        name="username"
+                        placeholder="Usuario"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group mb-4">
+                    <div class="input-group">
+                      <span class="input-group-text bg-light border-0">
+                        <i class="bx bxs-lock-alt text-muted"></i>
+                      </span>
+                      <input
+                        type="password"
+                        class="form-control ps-2"
+                        id="password"
+                        name="password"
+                        placeholder="Contraseña"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group mb-0">
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                      <i class="bx bxs-log-in me-2"></i>Ingresar al Sistema
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>
