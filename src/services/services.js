@@ -5,6 +5,11 @@ import { baseUrl, fhirRegionId, apiKey } from '../config/config.js';
 export const obtenerRegion = async (region) => {
     try {
         const url = `${baseUrl}/${fhirRegionId}/fhir/Organization/${region}`;
+        console.log("\n=== Inicio obtenerRegion ===");
+        console.log("URL:", url);
+        console.log("Region:", region);
+        console.log("=== Fin obtenerRegion ===\n");
+
         const response = await fetch(url, {
             method: 'GET',
             headers: {
